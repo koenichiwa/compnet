@@ -1,5 +1,4 @@
 import socketserver
-import socket
 
 
 class ClientHandler(socketserver.StreamRequestHandler):
@@ -20,7 +19,7 @@ class ClientHandler(socketserver.StreamRequestHandler):
 
             if data[0] == "HELLO-FROM":
                 if len(data) > 2:
-                    self.wfile.write("BAD-RQST-BODY\n")
+                    self.wfile.write("BAD-RQST-BODY\n".encode("utf-8"))
                 else:
                     thisname = data[1]
                     if thisname in self.nameSockMap:
@@ -33,7 +32,7 @@ class ClientHandler(socketserver.StreamRequestHandler):
 
             elif data[0] == "WHO":
                 if len(data) > 1:
-                    self.wfile.write("BAD-RQST-BODY\n")
+                    self.wfile.write("BAD-RQST-BODY\n".encode("utf-8"))
                 else:
                     print("WHO-OK {}\n".format(','.join(self.nameSockMap.keys())))
                     self.wfile.write("WHO-OK {}\n".format(','.join(self.nameSockMap.keys())).encode("utf-8"))
