@@ -45,7 +45,7 @@ def create_udp_socket(timeout):
     return UdpConnection(sock, hostname, port, timeout)
 
 
-def create_new_user(udpConn):
+def try_create_new_user(udpConn: UdpConnection):
     name = input("Specify a username: ")
     udpConn.send("HELLO-FROM {}".format(name))
     data = udpConn.receive(2048)
@@ -59,11 +59,11 @@ def create_new_user(udpConn):
         elif data.startswith("BUSY"):
             print("Server is to busy, try again later\n")
         retry = input("Try again? (Y/N)")
-        if retry.lower() == "Y":
+        if retry.lower() == "y":
             return
 
 
-def handle_user_input(user):
+def handle_user_input(user: User):
     while user.connected:
         line = stdin.readline().split()
         if len(line) == 0:
@@ -97,13 +97,17 @@ def handle_server_input(user):
 
 
 def handle_new_user(user):
-    userT = Thread(target=handle_user_input, args=(user,))
-    serverT = Thread(target=handle_server_input, args=(user,))
+    user_t = Thread(target=handle_user_input, args=(user,))
+    server_t = Thread(target=handle_server_input, args=(user,))
+    user_t.start()
+    server_t.start()
+    user_t.join()
+    server_t.join()
 
 
 if __name__ == "__main__":
     udpConn = create_udp_socket(1)
-    user = create_new_user(udpConn)
+    user = try_create_new_user(udpConn)
     if user is not None:
         handle_new_user(user)
     print("Exiting...")
